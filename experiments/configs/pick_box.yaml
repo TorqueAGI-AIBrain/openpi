@@ -17,7 +17,7 @@ data:
     - pick_box_lvl2_0
     - pick_box_lvl2_1
   # Name of the merged processed dataset (output of process_single_arm.py --merge)
-  merged_name: pick_box-all-right
+  merged_name: pick_box-all-right-v21
 
 model:
   base_checkpoint: gs://openpi-assets/checkpoints/pi05_base/params
