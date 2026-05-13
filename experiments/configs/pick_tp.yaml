@@ -1,0 +1,43 @@
+# pick_tp.yaml: Experiment config for single right-arm pi0.5 fine-tuning on pick_tp task.
+# Used by train.sh and eval.sh to configure remote training/eval jobs.
+
+experiment:
+  name: pick_tp_pi05_lora
+  project_name: openpi-pick-tp
+
+data:
+  raw_dir: experiments/data/raw
+  processed_dir: experiments/data/processed
+  datasets:
+    - pick_tp
+    - pick_tp2
+  # Name of the merged processed dataset (output of process_single_arm.py --merge)
+  merged_name: pick_tp-all-right-v21
+
+model:
+  base_checkpoint: gs://openpi-assets/checkpoints/pi05_base/params
+  assets_dir: gs://openpi-assets/checkpoints/pi05_base/assets
+  asset_id: trossen
+  pytorch_weight_path: null
+
+training:
+  num_train_steps: 10000
+  batch_size: 16
+  use_lora: true
+  peak_lr: 5.0e-5
+  warmup_steps: 1000
+  save_interval: 2000
+  resume: false
+  wandb_enabled: true
+  checkpoint_base_dir: ./checkpoints
+
+eval:
+  checkpoint_step: null  # null = latest
+  port: 8000
+
+# Remote server config — set server.name to an entry from ~/.ssh/config
+server:
+  name: aws-L40S-server1
+  remote_dir: ~/openpi
+  remote_data_dir: ~/data/pick_tp
+  gpu_count: 1
