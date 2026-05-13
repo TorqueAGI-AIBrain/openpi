@@ -31,7 +31,7 @@ from transforms import AlohaSingleArmOutputs
 import openpi.policies.policy_config as policy_config
 
 
-def evaluate_on_dataset(policy, repo_id, num_episodes=5, frames_per_episode=10):
+def evaluate_on_dataset(policy, repo_id, num_episodes=5, frames_per_episode=10, prompt="pick object"):
     """Run inference on dataset episodes and report prediction errors."""
     from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 
@@ -74,7 +74,7 @@ def evaluate_on_dataset(policy, repo_id, num_episodes=5, frames_per_episode=10):
                     "cam_high": images["cam_high"],
                     "cam_right_wrist": images["cam_right_wrist"],
                 },
-                "prompt": "pick lipbalm",
+                "prompt": prompt,
             }
 
             result = policy.infer(inference_input)
@@ -116,7 +116,7 @@ def main():
                         help="Frames to sample per episode")
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", force=True)
 
     if Path(args.config).exists():
         train_config = build_config_from_yaml(args.config)
@@ -156,10 +156,17 @@ def main():
     logging.info(f"Episodes: {args.num_episodes}, Frames/episode: {args.frames_per_episode}")
     logging.info(f"{'='*60}")
 
+    # Derive prompt from config (same logic as config.py)
+    exp_name = train_config.exp_name
+    task_name = exp_name.replace("_pi05_lora", "").replace("_pi05", "")
+    prompt = f"pick {task_name.replace('_', ' ')}"
+    logging.info(f"Prompt: {prompt}")
+
     results = evaluate_on_dataset(
         policy, repo_id,
         num_episodes=args.num_episodes,
         frames_per_episode=args.frames_per_episode,
+        prompt=prompt,
     )
 
     # Summary
